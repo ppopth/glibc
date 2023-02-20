@@ -300,7 +300,6 @@ static void hex_encode(uint64_t val, char *s) {
         s[15-i] = letters[val & 0xf];
         val >>= 4;
     }
-    s[16] = '\0';
 }
 
 static void dec_encode(uint32_t val, char *s) {
@@ -309,7 +308,6 @@ static void dec_encode(uint32_t val, char *s) {
         s[9-i] = letters[val % 10];
         val /= 10;
     }
-    s[10] = '\0';
     for(int i = 0 ; i < 10; i++) {
         if (s[i] == '0') s[i] = ' ';
         else break;
@@ -3669,11 +3667,13 @@ __libc_calloc (size_t n, size_t elem_size)
   if (SINGLE_THREAD_P)
     av = &main_arena;
   else {
-    char v[17], p[17], t[11];
-    hex_encode(thread_arena->mutex, v);
-    hex_encode((uint64_t) &thread_arena->mutex, p);
-    dec_encode(gettid(), t);
-    printf("mutex at %s with value %s with tid %s\n", p, v, t);
+    const char *template = "mutex at 0000000000000000 with value 0000000000000000 with tid 0000000000\n";
+    char s[74];
+    for(int i = 0; i < 74; i++) s[i] = template[i];
+    hex_encode((uint64_t) &thread_arena->mutex, &s[9]);
+    hex_encode(thread_arena->mutex, &s[37]);
+    dec_encode(gettid(), &s[63]);
+    write(STDOUT_FILENO, s, 74);
     arena_get (av, sz);
   }
 
