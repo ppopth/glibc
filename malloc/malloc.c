@@ -3667,13 +3667,14 @@ __libc_calloc (size_t n, size_t elem_size)
   if (SINGLE_THREAD_P)
     av = &main_arena;
   else {
-    const char *template = "mutex at 0000000000000000 with value 0000000000000000 with tid 0000000000\n";
-    char s[74];
-    for(int i = 0; i < 74; i++) s[i] = template[i];
+    const char *template = "mutex at 0000000000000000 with value 0000000000000000 with tid 0000000000 and pid 0000000000\n";
+    char s[93];
+    for(int i = 0; i < 93; i++) s[i] = template[i];
     hex_encode((uint64_t) &thread_arena->mutex, &s[9]);
     hex_encode(thread_arena->mutex, &s[37]);
     dec_encode(gettid(), &s[63]);
-    write(STDOUT_FILENO, s, 74);
+    dec_encode(getpid(), &s[82]);
+    write(STDOUT_FILENO, s, 93);
     arena_get (av, sz);
   }
 
